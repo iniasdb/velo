@@ -1,3 +1,5 @@
 /__pycache__
 /velo
-velo.geojson
+/logs
+/files/velo.geojson
+/helperClasses/csvHelper.py
