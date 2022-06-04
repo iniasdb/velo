@@ -4,7 +4,7 @@ from Station import Station
 from Transporter import Transporter
 from User import User
 from helperClasses.SiteGenerator import SiteGenerator
-from helperClasses.databaseConnector import DatabaseConnector
+from helperClasses.database import Database
 import json
 
 import shortuuid
@@ -149,7 +149,7 @@ def start_menu():
 
 
 if __name__ == "__main__":
-    db = DatabaseConnector()
+    db = Database()
     db.init_database()
     
     start_menu()
