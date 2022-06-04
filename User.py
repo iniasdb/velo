@@ -1,11 +1,11 @@
 class User:
-    def __init__(self, uid, fname, lname, email, subscribed, active):
+    def __init__(self, uid, fname, lname, email, subscribed, transporter):
         self.uid = uid
         self.fname = fname
         self.lname = lname
         self.email = email
         self.subscribed = subscribed
-        self.active = active
+        self.transporter = transporter
         self.bike = None
 
     def get_bike(self):
@@ -15,4 +15,4 @@ class User:
         self.bike = bike
 
     def __str__(self):
-        return f"First name: {self.fname}; Last name: {self.lname}; Email: {self.email}; sub: {self.subscribed}; active: {self.active}"
+        return f"First name: {self.fname}; Last name: {self.lname}; Email: {self.email}; sub: {self.subscribed}"

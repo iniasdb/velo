@@ -1,11 +1,11 @@
 from random import randint
+import shortuuid
 from Bike import Bike
 from Slot import Slot
 
 class Station:
-    def __init__(self, uid, name, position, street, number, addition, district, postal_code, in_use, capacity):
+    def __init__(self, uid, position, street, number, addition, district, postal_code, in_use, capacity):
         self.uid = uid
-        self.name = name
         self.position = position
         self.street = street
         self.number = number
@@ -16,26 +16,22 @@ class Station:
         self.capacity = capacity
         self.slots_list = []
 
-        self.__generate_slots()
-
-    def __generate_slots(self):
+    def generate_slots(self):
         i = 1
         for i in range(0, self.capacity):
             rand = randint(0, 1)
             if rand:
-                bike = Bike(1, True)
+                uid = shortuuid.uuid()[:10]
+                bike = Bike(uid, True)
                 slot = Slot(i, rand, bike)
             else:
                 slot = Slot(i, rand)
 
-            self.__add_slot(slot)
+            self.add_slot(slot)
             i+=1
 
-    def __add_slot(self, slot):
+    def add_slot(self, slot):
         self.slots_list.append(slot)
-    
-    def __remove_slot(self, slot):
-        self.slots_list.remove(slot)
 
     def print_slots(self):
         #TODO: print details
@@ -73,4 +69,7 @@ class Station:
     def return_bike(self, user):
         slot = self.get_empty_slot()
         slot.place_bike(user)
+
+    def __str__(self):
+        return f"straat: {self.street}; nummer: {self.number}; postcode: {self.postal_code}; gebruik: {self.in_use}; cap: {self.capacity}"
 

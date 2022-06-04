@@ -7,7 +7,7 @@ class Logger:
             try:
                 self.filename = "./logs/velo.log"
                 self.log_file = open(self.filename, "a+")
-            except Exception as e:
+            except Exception:
                 print("something went wrong")
 
     def set_logging_level(self, logging_level):
@@ -22,7 +22,7 @@ class Logger:
     def get_out(self):
         return self.out
 
-    def printer(self, message):
+    def __printer(self, message):
         if self.out == None:
             print(message)
         elif self.out == "File":
@@ -30,20 +30,20 @@ class Logger:
 
     def fatal(self, message):
         if self.level >= 1:
-            self.printer("FATAL: " + message)
+            self.__printer("FATAL: " + message)
     
     def error(self, message):
         if self.level >= 2:
-            self.printer("ERROR: " + message)
+            self.__printer("ERROR: " + message)
     
     def warn(self, message):
         if self.level >= 3:
-            self.printer("WARN: " + message)   
+            self.__printer("WARN: " + message)   
     
     def info(self, message):
         if self.level >= 4:
-            self.printer("INFO: " + message)
+            self.__printer("INFO: " + message)
     
     def debug(self, message):
         if self.level == 5:
-            self.printer("DEBUG: " + message)
+            self.__printer("DEBUG: " + message)
