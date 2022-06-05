@@ -13,7 +13,7 @@ class Relocation:
         self.new_station = station
 
     def __str__(self):
-        if self.prev_station == None:
+        if self.new_station == None:
             street = None
         else:
             street = self.new_station.street

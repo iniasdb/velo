@@ -29,7 +29,7 @@ low_station_list = []
 overflow_station_list = []
 relocation_list = []
 
-logger = Logger(5, True, True)
+logger = Logger(5, False, True)
 
 def start_over(db, am_users, am_transporters):
     db.clear()
@@ -158,6 +158,83 @@ def start_menu(load):
                 logger.info(f"New data generated with {am_users} users and {am_transporters} transporters")
                 answered = True
 
+def main_menu():
+    print("MAIN MENU")
+
+    running = True
+    while running:
+        answered = False
+        while not answered:
+            option = input("\n1) Gebruiker fiets laten lenen\n2) Gebruiker fiets laten terugbrengen\n3) Transporteur fiets laten ophalen\n4) Transporteur fiets laten terugbrengen\nQ om af te sluiten\n")
+            if option == "1":
+                loan_bike(False)
+                answered = True
+            elif option == "2":
+                return_bike(False)
+                answered = True
+            elif option == "3":
+                loan_bike(True)
+                answered = True
+            elif option == "4":
+                return_bike(True)
+                answered = True
+            elif option == "Q":
+                running = False
+                answered = True
+
+def loan_bike(is_transporter):
+    station = station_list[randint(0, len(station_list)-1)]
+
+    if is_transporter:
+        transporter = transporter_list[randint(0, len(transporter_list)-1)]
+
+        rel = station.loan_bike(transporter)
+
+        relocation_list.append(rel)
+        active_transporter_list[transporter] = rel
+        transporter_list.remove(transporter)        
+    else:
+        user = user_list[randint(0, len(user_list)-1)]
+        
+        rel = station.loan_bike(user)
+
+        relocation_list.append(rel)
+        active_user_list[user] = rel
+        user_list.remove(user)
+
+    logger.relocation(str(rel))
+
+def return_bike(is_transporter):
+    station = station_list[randint(0, len(station_list)-1)]
+
+    if is_transporter:
+        randomIndex = randint(0, len(active_transporter_list)-1)
+        
+        key_list = list(active_transporter_list.keys())
+        val_list = list(active_transporter_list.values())
+
+        transporter = key_list[randomIndex]
+        rel = val_list[randomIndex]
+
+        station.return_bike(transporter, rel)
+        if transporter.count_bikes() == 0:
+            active_transporter_list.pop(transporter)
+    else:
+        if not len(active_user_list) == 0:         
+            randomIndex = randint(0, len(active_user_list)-1)
+
+            key_list = list(active_user_list.keys())
+            val_list = list(active_user_list.values())
+
+            user = key_list[randomIndex]
+            rel = val_list[randomIndex]
+            
+            station.return_bike(user, rel)
+            active_user_list.pop(user)
+            user_list.append(user)
+
+    logger.relocation(str(rel))
+
 def simulate():
     running = True
     bike_loan_chance = 0.30
@@ -172,15 +249,7 @@ def simulate():
     try:
         while running:
             if random() < bike_loan_chance:
-                index = randint(0, len(user_list)-1)
-                user = user_list[index]
-                station = station_list[randint(0, len(station_list)-1)]
-
-                rel = station.loan_bike(user)
-                relocation_list.append(rel)
-
-                active_user_list[user] = rel
-                user_list.remove(user)
+                loan_bike(False)
 
             if random() < transporter_pickup_chance:
                 # Search for stations that are overflowing
@@ -237,26 +306,13 @@ def simulate():
                         while station.bikes_available()/cap < station_overflow_point and len(rel_list) > 0:
                             rel = rel_list.pop()
                             station.return_bike(transporter, rel)
-                            logger.info(str(rel))
+                            logger.relocation(str(rel))
                         
                     active_transporter_list.pop(transporter)
-
+                    transporter_list.append(transporter)
 
             if random() < bike_return_chance:
-                if not len(active_user_list) == 0:
-                    randomIndex = randint(0, len(active_user_list)-1)
-
-                    key_list = list(active_user_list.keys())
-                    val_list = list(active_user_list.values())
-
-                    user = key_list[randomIndex]
-                    rel = val_list[randomIndex]
-
-                    station = station_list[randint(0, len(station_list)-1)]
-                    
-                    station.return_bike(user, rel)
-                    active_user_list.pop(user)
-                    logger.info(str(rel))
+                return_bike(False)
 
 
             sleep(.5)
@@ -321,6 +377,8 @@ if __name__ == "__main__":
             print("ctrl+c om te stoppen")
             input("Enter drukken om te starten")
             simulate()
+
+    main_menu()
 
     save_data_to_db(db)
 

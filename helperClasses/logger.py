@@ -21,27 +21,30 @@ class Logger:
         if self.console:
             print(message)
         if self.file:
-            self.log_file.write(message + "\n")
+            self.log_file.write(f"\n{message}\n")
 
     def fatal(self, message):
         if self.level >= 1:
-            self.__printer("FATAL: " + message)
+            self.__printer(f"FATAL: {message}")
     
     def error(self, message):
         if self.level >= 2:
-            self.__printer("ERROR: " + message)
+            self.__printer(f"ERROR: {message}")
     
     def warn(self, message):
         if self.level >= 3:
-            self.__printer("WARN: " + message)   
+            self.__printer(f"WARN: {message}")
     
     def info(self, message):
         if self.level >= 4:
-            self.__printer("INFO: " + message)
+            self.__printer(f"INFO: {message}")
     
     def debug(self, message):
         if self.level == 5:
-            self.__printer("DEBUG: " + message)
+            self.__printer(f"DEBUG: {message}")
+    
+    def relocation(self, message):
+        print(f"\nRELOCATION: {message}\n")
 
     def __new__(cls, logging_level = 5, console = True, file = False):
         if not hasattr(cls, 'instance'):
