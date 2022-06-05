@@ -1,3 +1,7 @@
+from helperClasses.logger import Logger
+
+logger = Logger()
+
 class Slot:
     def __init__(self, index, occupied, bike = None):
         self.index = index
@@ -6,14 +10,12 @@ class Slot:
 
     def place_bike(self, user):
         bike = user.get_bike()
-        #user.set_bike(None)
         self.bike = bike
         self.occupied = True
     
     def release_bike(self, user):
         if self.occupied == False:
-            #TODO logging
-            print("no bike")
+            logger.warn("no bike")
             return None
         user.set_bike(self.bike)
         self.bike = None

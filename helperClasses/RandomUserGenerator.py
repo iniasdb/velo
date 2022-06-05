@@ -1,9 +1,12 @@
 import csv
-from pickle import TRUE
 import shortuuid
+
 from random import randint
 from Transporter import Transporter
 from User import User
+from helperClasses.logger import Logger
+
+logger = Logger()
 
 class RandomUserGenerator:
     def __init__(self):
@@ -15,16 +18,22 @@ class RandomUserGenerator:
         self.__load_data()
 
     def __load_data(self):
-        with open('files/names.csv', 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if row[1] == "first":
-                    self.first_names_list.append(row[0])
-                elif row[1] == "last":
-                    self.last_names_list.append(row[0])
-        with open('files/mails.txt', 'r') as file:
-            for mail in file:
-                self.mails_list.append(mail)
+        try:
+            with open('files/names.csv', 'r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if row[1] == "first":
+                        self.first_names_list.append(row[0])
+                    elif row[1] == "last":
+                        self.last_names_list.append(row[0])
+        except Exception:
+            logger.fatal("Couldn't open files/names.csv")
+        try:
+            with open('files/mails.txt', 'r') as file:
+                for mail in file:
+                    self.mails_list.append(mail)
+        except Exception:
+            logger.fatal("Couldn't open files/mails.txt")
 
     def __gen_name(self):
         randF = randint(0, len(self.first_names_list)-1)

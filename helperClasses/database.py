@@ -1,10 +1,18 @@
 import sqlite3
 import os
+from helperClasses.logger import Logger
+
 ROOT_DIR = os.path.dirname(os.path.abspath("App.py"))
+
+logger = Logger()
 
 class Database():
     def __init__(self):
-        self.conn = sqlite3.connect(ROOT_DIR + "/files/velo.db")
+        try:
+            self.conn = sqlite3.connect(ROOT_DIR + "/files/velo.db")
+            logger.info("Connected to database")
+        except Exception:
+            logger.fatal("Couldn't connect to database")
         self.curs = self.conn.cursor()
 
     def init_database(self):

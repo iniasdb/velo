@@ -1,9 +1,10 @@
 class Logger:
-    def __init__(self, logging_level=5, out=None):
+    def __init__(self, logging_level=5, console=True, file=False):
         self.level = logging_level
-        self.out = out
+        self.console = console
+        self.file = file
 
-        if out == "File":
+        if file:
             try:
                 self.filename = "./logs/velo.log"
                 self.log_file = open(self.filename, "a+")
@@ -15,17 +16,11 @@ class Logger:
 
     def get_logging_level(self):
         return self.level
-    
-    def set_out(self, out):
-        self.out = out
-
-    def get_out(self):
-        return self.out
 
     def __printer(self, message):
-        if self.out == None:
+        if self.console:
             print(message)
-        elif self.out == "File":
+        if self.file:
             self.log_file.write(message + "\n")
 
     def fatal(self, message):
@@ -47,3 +42,8 @@ class Logger:
     def debug(self, message):
         if self.level == 5:
             self.__printer("DEBUG: " + message)
+
+    def __new__(cls, logging_level = 5, console = True, file = False):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(Logger, cls).__new__(cls)
+        return cls.instance

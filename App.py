@@ -3,7 +3,7 @@ import sys
 from time import sleep
 import json
 
-from RandomUserGenerator import RandomUserGenerator
+from helperClasses.RandomUserGenerator import RandomUserGenerator
 from Slot import Slot
 from Station import Station
 from Transporter import Transporter
@@ -74,6 +74,8 @@ def start_over(db, am_users, am_transporters):
 
 def load_data(db):
     users = db.load_users()
+    u = 0
+    t = 0
     for user in users:
         if user[1] == 0:
             new_user = User(user[0], user[2], user[3], user[4], user[5], user[1])
@@ -83,6 +85,7 @@ def load_data(db):
                 new_bike = Bike(bike[0], bike[1])
                 new_user.set_bike(new_bike)
             user_list.append(new_user)
+            u+=1
         else:
             new_user = Transporter(user[0], user[2], user[3], user[4], user[1])
             bikeId = user[6]
@@ -92,7 +95,13 @@ def load_data(db):
                     new_bike = Bike(bike[0], bike[1])
                     new_user.set_bike(new_bike)
             transporter_list.append(new_user)
+            t+=1
 
+    logger.info(f"{u} users and {t} transporters loaded")
+
+    st = 0
+    s = 0
+    b = 0
     stations = db.load_stations()
     for station in stations:
         new_station = Station(station[0], station[1], station[2], station[3], station[4], station[5], station[6], station[7], station[8])
@@ -102,12 +111,17 @@ def load_data(db):
                 bike = db.load_bike(slot[2])[0]
                 new_bike = Bike(bike[0], bike[1])
                 new_slot = Slot(slot[0], True, new_bike)
+                b+=1
             else:
                 new_slot = Slot(slot[0], False)
             
             new_station.add_slot(new_slot)
+            s+=1
 
         station_list.append(new_station)
+        st+=1
+    
+    logger.info(f"{st} stations with {s} slots and {b} bikes loaded")
 
 def start_menu(load):
     print("Velo Antwerpen")
@@ -128,6 +142,7 @@ def start_menu(load):
                         am_users = int(input("Aantal users die u wilt toevoegen: "))
                         am_transporters = int(input("Aantal transporteurs die u wilt toevoegen: "))
                         start_over(db, am_users, am_transporters)
+                        logger.info(f"New data generated with {am_users} users and {am_transporters} transporters")
                         confirmed = True
                         answered = True
                     elif con == "n" or con == "N":
@@ -140,6 +155,7 @@ def start_menu(load):
                 am_users = int(input("Aantal users die u wilt toevoegen: "))
                 am_transporters = int(input("Aantal transporteurs die u wilt toevoegen: "))
                 start_over(db, am_users, am_transporters)
+                logger.info(f"New data generated with {am_users} users and {am_transporters} transporters")
                 answered = True
 
 def simulate():
@@ -156,13 +172,11 @@ def simulate():
     try:
         while running:
             if random() < bike_loan_chance:
-                print("loaning bike")
                 index = randint(0, len(user_list)-1)
                 user = user_list[index]
                 station = station_list[randint(0, len(station_list)-1)]
 
                 rel = station.loan_bike(user)
-                print(rel)
                 relocation_list.append(rel)
 
                 active_user_list[user] = rel
@@ -191,7 +205,6 @@ def simulate():
                         rel = station.loan_bike(transporter)
                         temp_rel_list.append(rel)
                         relocation_list.append(rel)
-                        print(rel)
 
                 if transporter.count_bikes() > 0:
                     active_transporter_list[transporter] = temp_rel_list
@@ -206,9 +219,7 @@ def simulate():
                     
                     if av/cap <= station_low_point:
                         low_station_list.append(station)
-                if len(active_transporter_list) > 0 and len(low_station_list) > 0:
-                    print("transporter returning bikes")
-                                    
+                if len(active_transporter_list) > 0 and len(low_station_list) > 0:                                    
                     key_list = list(active_transporter_list.keys())
                     val_list = list(active_transporter_list.values())
                 
@@ -226,14 +237,13 @@ def simulate():
                         while station.bikes_available()/cap < station_overflow_point and len(rel_list) > 0:
                             rel = rel_list.pop()
                             station.return_bike(transporter, rel)
-                            print(rel)
+                            logger.info(str(rel))
                         
                     active_transporter_list.pop(transporter)
 
 
             if random() < bike_return_chance:
                 if not len(active_user_list) == 0:
-                    print("Returning bike")
                     randomIndex = randint(0, len(active_user_list)-1)
 
                     key_list = list(active_user_list.keys())
@@ -246,12 +256,17 @@ def simulate():
                     
                     station.return_bike(user, rel)
                     active_user_list.pop(user)
-                    print(rel)
+                    logger.info(str(rel))
 
 
-            sleep(1)
+            sleep(.5)
     except KeyboardInterrupt:
-        print("Simulation stopped")
+        logger.info("Simulation stopped")
+    except IndexError:
+        logger.fatal("No data in database, start program again")
+    except Exception as e:
+        logger.fatal("Something went wrong")
+        print(e)
 
 def save_data_to_db(db):
     print("saving data to database")
@@ -271,7 +286,7 @@ def save_data_to_db(db):
 
     for transporter in active_transporter_list:
         db.insert_user(transporter)
-        bike_list = user.get_bike()
+        bike_list = transporter.get_bike_list()
         if not bike_list == None:
             for bike in bike_list:
                 db.insert_bike(bike)

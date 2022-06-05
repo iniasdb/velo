@@ -21,7 +21,3 @@ class Transporter(User):
 
     def get_capacity(self):
         return self.capacity
-
-    def print_bikes(self):
-        for bike in self.bike_list:
-            print(bike)

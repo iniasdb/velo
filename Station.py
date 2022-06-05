@@ -3,6 +3,9 @@ import shortuuid
 from Bike import Bike
 from Slot import Slot
 from Relocation import Relocation
+from helperClasses.logger import Logger
+
+logger = Logger()
 
 class Station:
     def __init__(self, uid, position, street, number, addition, district, postal_code, in_use, capacity):
@@ -34,14 +37,9 @@ class Station:
     def add_slot(self, slot):
         self.slots_list.append(slot)
 
-    def print_slots(self):
-        #TODO: print details
-        for slot in self.slots_list:
-            print(slot)
-
     def bikes_available(self):
         '''checks all slots if they are occupied
-           if not: increment amount of available bikes
+           if true: increment amount of available bikes
         '''
         bikes = 0
         
@@ -55,20 +53,19 @@ class Station:
         for slot in self.slots_list:
             if not slot.get_occupied():
                 return slot
-        return "No empty slots"
+        logger.warn("No empty slots")
 
     def get_occupied_slot(self):
         for slot in self.slots_list:
             if slot.get_occupied():
                 return slot
-        return "No occupied slots"
+        logger.warn("No occupied slots")
 
     def loan_bike(self, user):
         slot = self.get_occupied_slot()
         bike = slot.get_bike()
         slot.release_bike(user)
         return Relocation(user, bike, self)
-
 
     def return_bike(self, user, relocation):
         slot = self.get_empty_slot()

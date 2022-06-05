@@ -13,5 +13,12 @@ class Relocation:
         self.new_station = station
 
     def __str__(self):
-        #return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {self.new_station.street} by {self.user.fname}"
-        return f"user: {self.user}; bike: {self.bike}; prevstation: {self.prev_station}; new station: {self.new_station}"
+        if self.prev_station == None:
+            street = None
+        else:
+            street = self.new_station.street
+        
+        if self.user.transporter:
+            return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {street} by transporter {self.user.fname}"
+        else:
+            return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {street} by {self.user.fname}"
