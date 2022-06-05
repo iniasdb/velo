@@ -2,6 +2,7 @@ from random import randint
 import shortuuid
 from Bike import Bike
 from Slot import Slot
+from Relocation import Relocation
 
 class Station:
     def __init__(self, uid, position, street, number, addition, district, postal_code, in_use, capacity):
@@ -64,11 +65,18 @@ class Station:
 
     def loan_bike(self, user):
         slot = self.get_occupied_slot()
+        bike = slot.get_bike()
         slot.release_bike(user)
+        return Relocation(user, bike, self)
 
-    def return_bike(self, user):
+
+    def return_bike(self, user, relocation):
         slot = self.get_empty_slot()
         slot.place_bike(user)
+        relocation.set_new_station(self)
+
+    def get_capacity(self):
+        return self.capacity
 
     def __str__(self):
         return f"straat: {self.street}; nummer: {self.number}; postcode: {self.postal_code}; gebruik: {self.in_use}; cap: {self.capacity}"

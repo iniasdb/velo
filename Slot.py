@@ -6,7 +6,7 @@ class Slot:
 
     def place_bike(self, user):
         bike = user.get_bike()
-        user.set_bike(None)
+        #user.set_bike(None)
         self.bike = bike
         self.occupied = True
     

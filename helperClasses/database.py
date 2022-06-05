@@ -46,6 +46,26 @@ class Database():
             bikeId INT NOT NULL
         );""")
 
+        self.curs.execute("""CREATE TABLE IF NOT EXISTS relocations(
+            uid INT PRIMARY KEY NOT NULL,
+            user INT NOT NULL,
+            bike INT NOT NULL,
+            prevStation INT NOT NULL,
+            newStation INT
+        );""")
+
+    def clear(self):
+        self.curs.execute("DELETE FROM users")
+        self.curs.execute("DELETE FROM bikes")
+        self.curs.execute("DELETE FROM stations")
+        self.curs.execute("DELETE FROM slots")
+        self.curs.execute("DELETE FROM userBikeLink")
+
+        self.conn.commit()
+
+    def commit(self):
+        self.conn.commit()
+
     def insert_user(self, user):
         bike = user.bike
         if user.transporter:
@@ -62,13 +82,11 @@ class Database():
                 uid = bike.uid
             user_data = (user.uid, user.transporter, user.fname, user.lname, user.email, user.subscribed, uid)
             self.curs.execute("INSERT INTO users (uid, transporter, fname, lname, email, subscribed, bikeId) VALUES (?, ?, ?, ?, ?, ?, ?)", user_data)
-        self.conn.commit()
 
     def insert_user_bike_link(self, user):
         for bike in user.get_bike_list():
             link_data = (user.uid, bike.uid)
             self.curs.execute("INSERT INTO userBikeLink(userId, bikeId) VALUES(?, ?)", link_data)
-            self.conn.commit()
 
     def load_users(self):
         users = self.curs.execute("SELECT * FROM users;")
@@ -77,7 +95,6 @@ class Database():
     def insert_station(self, station):
         station_data = (station.uid, station.position, station.street, station.number, station.addition, station.district, station.postal_code, station.in_use, station.capacity)
         self.curs.execute("INSERT INTO stations (uid, position, street, number, addition, district, postalCode, inUse, capacity) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);", station_data)
-        self.conn.commit()
 
     def load_stations(self):
         stations = self.curs.execute("SELECT * FROM stations;")
@@ -91,7 +108,6 @@ class Database():
             uid = bike.uid
         slot_data = (slot.index, station_id, uid)
         self.curs.execute("INSERT INTO slots (slotIndex, stationId, bikeId) VALUES(?, ?, ?);", slot_data)
-        self.conn.commit()
 
     def load_slots(self, stationId):
         slots = self.curs.execute("SELECT * FROM slots WHERE stationId = ?;", (stationId,))
@@ -100,7 +116,6 @@ class Database():
     def insert_bike(self, bike):
         bike_data = (bike.uid, bike.in_use)
         self.curs.execute("INSERT INTO bikes (uid, inUse) VALUES(?, ?);", bike_data)
-        self.conn.commit()
 
     def load_bike(self, uid):
         bike = self.curs.execute("SELECT * FROM bikes WHERE uid = ?", (uid,))
@@ -110,7 +125,21 @@ class Database():
         bikes = self.curs.execute("SELECT * FROM userBikeLink WHERE userId = ?", (userId,))
         return bikes.fetchall()
 
+    def check_empty(self):
+        bike = self.curs.execute("SELECT * FROM bikes LIMIT 1")
+        data = bike.fetchall()
+        if len(data) == 0:
+            return False
+        return True
+
+    def insert_relocation(self, relocation):
+        if relocation.new_station == None:
+            new = None
+        else:
+            new = relocation.new_station.uid
+        relocation_data = (relocation.uid, relocation.user.uid, relocation.bike.uid, relocation.prev_station.uid, new)
+        self.curs.execute("INSERT INTO relocations (uid, user, bike, prevStation, newStation) VALUES(?, ?, ?, ?, ?);", relocation_data)    
+
     def disconnect(self):
         self.curs.close()
         self.conn.close()
-        

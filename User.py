@@ -9,7 +9,9 @@ class User:
         self.bike = None
 
     def get_bike(self):
-        return self.bike
+        bike = self.bike
+        self.bike = None
+        return bike
 
     def set_bike(self, bike):
         self.bike = bike
