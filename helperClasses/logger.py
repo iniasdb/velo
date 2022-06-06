@@ -1,3 +1,6 @@
+import os
+
+
 class Logger:
     def __init__(self, logging_level=5, console=True, file=False):
         self.level = logging_level
@@ -9,6 +12,8 @@ class Logger:
                 self.filename = "./logs/velo.log"
                 self.log_file = open(self.filename, "a+")
             except Exception:
+                os.mkdir("logs")
+                self.log_file = open(self.filename, "a+")
                 print("something went wrong")
 
     def set_logging_level(self, logging_level):
