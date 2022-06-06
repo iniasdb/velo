@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from helperClasses.logger import Logger
+from helperClasses.Logger import Logger
 
 ROOT_DIR = os.path.dirname(os.path.abspath("App.py"))
 

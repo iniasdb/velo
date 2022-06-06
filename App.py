@@ -13,9 +13,10 @@ from Transporter import Transporter
 from User import User
 from Bike import Bike
 from helperClasses.SiteGenerator import SiteGenerator
-from helperClasses.database import Database
-from helperClasses.logger import Logger
+from helperClasses.Database import Database
+from helperClasses.Logger import Logger
 from helperClasses.RandomUserGenerator import RandomUserGenerator
+from helperClasses.ExcelExporter import ExcelExporter
 from GUI.Gui import PyCalcUI
 
 ROOT_DIR = os.path.dirname(os.path.abspath("App.py"))
@@ -167,7 +168,7 @@ def main_menu():
     while running:
         answered = False
         while not answered:
-            option = input("\n1) Gebruiker fiets laten lenen\n2) Gebruiker fiets laten terugbrengen\n3) Transporteur fiets laten ophalen\n4) Transporteur fiets laten terugbrengen\n5) Simulatie starten\n6) Station GUI\n7) Webpagina genereren\nQ om af te sluiten\n")
+            option = input("\n1) Gebruiker fiets laten lenen\n2) Gebruiker fiets laten terugbrengen\n3) Transporteur fiets laten ophalen\n4) Transporteur fiets laten terugbrengen\n5) Simulatie starten\n6) Station GUI\n7) Webpagina genereren\n8) Excel output genereren\nQ om af te sluiten\n")
             if option == "1":
                 loan_bike(False)
                 answered = True
@@ -189,6 +190,8 @@ def main_menu():
             elif option == "7":
                 site_menu()
                 answered = True
+            elif option == "8":
+                ExcelExporter(relocation_list)
             elif option == "Q" or option == "q":
                 running = False
                 answered = True
@@ -402,7 +405,7 @@ def simulate():
         print(e)
 
 def save_data_to_db(db):
-    print("saving data to database")
+    logger.info("saving data to database")
     db.clear()
 
     for user in user_list:

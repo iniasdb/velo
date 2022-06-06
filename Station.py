@@ -3,7 +3,7 @@ import shortuuid
 from Bike import Bike
 from Slot import Slot
 from Relocation import Relocation
-from helperClasses.logger import Logger
+from helperClasses.Logger import Logger
 
 logger = Logger()
 

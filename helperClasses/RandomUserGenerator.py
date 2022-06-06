@@ -4,7 +4,7 @@ import shortuuid
 from random import randint
 from Transporter import Transporter
 from User import User
-from helperClasses.logger import Logger
+from helperClasses.Logger import Logger
 
 logger = Logger()
 

@@ -12,13 +12,25 @@ class Relocation:
     def set_new_station(self, station):
         self.new_station = station
 
+    def get_data(self):
+        name = str(self.user.fname.capitalize()) + " " + str(self.user.lname.capitalize())
+
+        if self.new_station == None:
+             new_street = "None"
+        else:
+            new_street = self.new_station.street
+
+        
+        return (self.bike.uid, name, self.prev_station.street, new_street)     
+
     def __str__(self):
         if self.new_station == None:
-            street = None
+            if self.user.transporter:
+                return f"Bike {self.bike.uid} moved from {self.prev_station.street} by transporter {self.user.fname.capitalize()} {self.user.lname.capitalize()}"
+            else:
+                return f"Bike {self.bike.uid} moved from {self.prev_station.street} by {self.user.fname.capitalize()} {self.user.lname.capitalize()}"
         else:
-            street = self.new_station.street
-        
-        if self.user.transporter:
-            return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {street} by transporter {self.user.fname}"
-        else:
-            return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {street} by {self.user.fname}"
+            if self.user.transporter:
+                return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {self.new_station.street} by transporter {self.user.fname.capitalize()} {self.user.lname.capitalize()}"
+            else:
+                return f"Bike {self.bike.uid} moved from {self.prev_station.street} to {self.new_station.street} by {self.user.fname.capitalize()} {self.user.lname.capitalize()}"

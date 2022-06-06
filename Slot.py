@@ -1,4 +1,4 @@
-from helperClasses.logger import Logger
+from helperClasses.Logger import Logger
 
 logger = Logger()
 
