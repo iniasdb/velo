@@ -3,4 +3,5 @@
 /logs
 /helperClasses/csvHelper.py
 /helperClasses/__pycache__
+/GUI/__pycache__
 /files/velo.db

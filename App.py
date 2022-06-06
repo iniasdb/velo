@@ -1,9 +1,12 @@
-from random import random, randint
 import sys
-from time import sleep
+import os
 import json
+import webbrowser
+from PyQt5.QtWidgets import QApplication
+from random import random, randint
+from time import sleep
 
-from helperClasses.RandomUserGenerator import RandomUserGenerator
+
 from Slot import Slot
 from Station import Station
 from Transporter import Transporter
@@ -12,13 +15,14 @@ from Bike import Bike
 from helperClasses.SiteGenerator import SiteGenerator
 from helperClasses.database import Database
 from helperClasses.logger import Logger
+from helperClasses.RandomUserGenerator import RandomUserGenerator
+from GUI.Gui import PyCalcUI
 
+ROOT_DIR = os.path.dirname(os.path.abspath("App.py"))
 
-if __name__ == "__man__":
-    station = Station(1, "straat", "st jansplein", 4, None, "Antwerpen", 2000, True, 20)
+logger = Logger(5, False, True)
 
-    gen = SiteGenerator()
-    gen.create_stationpage(station)
+view = ""
 
 user_list = []
 active_user_list = {}
@@ -28,8 +32,6 @@ station_list = []
 low_station_list = []
 overflow_station_list = []
 relocation_list = []
-
-logger = Logger(5, False, True)
 
 def start_over(db, am_users, am_transporters):
     db.clear()
@@ -165,7 +167,7 @@ def main_menu():
     while running:
         answered = False
         while not answered:
-            option = input("\n1) Gebruiker fiets laten lenen\n2) Gebruiker fiets laten terugbrengen\n3) Transporteur fiets laten ophalen\n4) Transporteur fiets laten terugbrengen\nQ om af te sluiten\n")
+            option = input("\n1) Gebruiker fiets laten lenen\n2) Gebruiker fiets laten terugbrengen\n3) Transporteur fiets laten ophalen\n4) Transporteur fiets laten terugbrengen\n5) Simulatie starten\n6) Station GUI\n7) Webpagina genereren\nQ om af te sluiten\n")
             if option == "1":
                 loan_bike(False)
                 answered = True
@@ -178,11 +180,70 @@ def main_menu():
             elif option == "4":
                 return_bike(True)
                 answered = True
-            elif option == "Q":
+            elif option == "5":
+                simulate()
+                answered = True
+            elif option == "6":
+                load_gui()
+                answered == True
+            elif option == "7":
+                site_menu()
+                answered = True
+            elif option == "Q" or option == "q":
                 running = False
                 answered = True
 
-def loan_bike(is_transporter):
+def site_menu():
+    gen = SiteGenerator()
+    station = station_list[randint(0, len(station_list)-1)]
+
+    running = True
+    while running:
+        answered = False
+        while not answered:
+            option = input("\n1) Station infopagina laden\n2) Gebruiker infopagina laden\n3) Fiets infopagina laden\nQ om af te sluiten\n")
+            if option == "1":
+                gen.create_stationpage(station)
+                webbrowser.open('file://' + os.path.realpath("_site/stations.html"))
+                answered = True
+            elif option == "2":
+                if randint(0, 1) == 0:
+                    user = user_list[randint(0, len(user_list)-1)]
+                else:
+                    user = transporter_list[randint(0, len(transporter_list)-1)]
+                webbrowser.open('file://' + os.path.realpath("_site/users.html"))
+                gen.create_userpage(user)
+                answered = True
+            elif option == "3":
+                bike = station.get_occupied_slot().get_bike()
+                gen.create_bikepage(bike)
+                webbrowser.open('file://' + os.path.realpath("_site/bikes.html"))
+                answered = True
+            elif option == "Q" or option == "q":
+                running = False
+                answered = True
+def load_gui():
+    app = QApplication(sys.argv)
+    global view 
+    view = PyCalcUI()
+    view.show()
+    view.buttons['FIETS ONTLENEN'].clicked.connect(gui_loan_bike)
+    view.buttons['FIETS TERUGBRENGEN'].clicked.connect(gui_return_bike)
+    view.buttons['FIETS TERUGBRENGEN'].setEnabled(False)
+
+    app.exec()
+
+def gui_loan_bike():
+    slot = loan_bike(False, True)
+    view.set_display_text(f"Fiets nemen uit slot {slot.get_index()}")
+    view.buttons['FIETS TERUGBRENGEN'].setEnabled(True)
+
+def gui_return_bike():
+    slot = return_bike(False, True)
+    view.set_display_text(f"Fiets plaatsen in slot {slot.get_index()}")
+    view.buttons['FIETS TERUGBRENGEN'].setEnabled(False)
+
+def loan_bike(is_transporter, return_slot_nr = False):
     station = station_list[randint(0, len(station_list)-1)]
 
     if is_transporter:
@@ -196,15 +257,22 @@ def loan_bike(is_transporter):
     else:
         user = user_list[randint(0, len(user_list)-1)]
         
-        rel = station.loan_bike(user)
+        if return_slot_nr:
+            return_data = station.loan_bike(user, True)
+            rel = return_data[0]
+            slot = return_data[1]
+        else:
+            rel = station.loan_bike(user)
 
         relocation_list.append(rel)
         active_user_list[user] = rel
         user_list.remove(user)
 
     logger.relocation(str(rel))
+    if return_slot_nr:
+        return slot
 
-def return_bike(is_transporter):
+def return_bike(is_transporter, return_slot_nr = False):
     station = station_list[randint(0, len(station_list)-1)]
 
     if is_transporter:
@@ -219,8 +287,9 @@ def return_bike(is_transporter):
         station.return_bike(transporter, rel)
         if transporter.count_bikes() == 0:
             active_transporter_list.pop(transporter)
+            logger.relocation(str(rel))
     else:
-        if not len(active_user_list) == 0:         
+        if not len(active_user_list) == 0:     
             randomIndex = randint(0, len(active_user_list)-1)
 
             key_list = list(active_user_list.keys())
@@ -229,22 +298,29 @@ def return_bike(is_transporter):
             user = key_list[randomIndex]
             rel = val_list[randomIndex]
             
-            station.return_bike(user, rel)
+            slot = station.return_bike(user, rel)
             active_user_list.pop(user)
             user_list.append(user)
 
-    logger.relocation(str(rel))
+            logger.relocation(str(rel))
+
+    if return_slot_nr:
+        return slot
 
 def simulate():
     running = True
     bike_loan_chance = 0.30
     bike_return_chance = 0.45
-    transporter_pickup_chance = 0.20
+    transporter_pickup_chance = 0.30
     transporter_return_chance = 0.6
 
     # percentage when station needs to be filled
-    station_low_point = 0.30
-    station_overflow_point = 0.6
+    station_low_point = 0.40
+    station_overflow_point = 0.58
+
+    print("\nSimulatie modus")
+    print("ctrl+c om te stoppen")
+    input("Enter drukken om te starten")
 
     try:
         while running:
@@ -312,7 +388,8 @@ def simulate():
                     transporter_list.append(transporter)
 
             if random() < bike_return_chance:
-                return_bike(False)
+                if len(active_user_list) > 0:
+                    return_bike(False)
 
 
             sleep(.5)
@@ -373,9 +450,6 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         if sys.argv[1] == "-s":
-            print("Simulatie modus")
-            print("ctrl+c om te stoppen")
-            input("Enter drukken om te starten")
             simulate()
 
     main_menu()

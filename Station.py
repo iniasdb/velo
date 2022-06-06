@@ -67,10 +67,20 @@ class Station:
         slot.release_bike(user)
         return Relocation(user, bike, self)
 
+    def loan_bike(self, user, return_slot_nr = False):
+        slot = self.get_occupied_slot()
+        bike = slot.get_bike()
+        slot.release_bike(user)
+        if return_slot_nr:
+            return (Relocation(user, bike, self), slot)
+        else:
+            return Relocation(user, bike, self)
+
     def return_bike(self, user, relocation):
         slot = self.get_empty_slot()
         slot.place_bike(user)
         relocation.set_new_station(self)
+        return slot
 
     def get_capacity(self):
         return self.capacity
