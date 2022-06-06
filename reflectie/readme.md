@@ -94,7 +94,7 @@ Het project bestaat volledig uit deze technologieën en gebruikt volgende python
    ```sh
    pip install -r requirements.txt
    ```
-5. Deactive virtual environment
+5. Deactive virtual environment (na het runnen van het script)
    ```sh
    deactivate
    ```
@@ -119,6 +119,7 @@ Nadien komt u bij het hoofdmenu, hier zal u een keuze kunnen maken tussen de ver
 * Station gebruikers interface laden
 * Webpagina genereren
 * Excel bestand creëren met alle transacties die in runtime gebeurd zijn
+  * Worksheet wordt in velo map gecreëerd
 
 Indien u kiest voor een webpagina te generen krijgt u een keuzemenu waar u moet kiezen tussen:
 
