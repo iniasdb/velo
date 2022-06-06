@@ -1,7 +1,30 @@
+body {
+    background-color: #D11E49;
+}
+
 #green {
     color: green;
 }
 
 #red {
     color: red;
+}
+
+div.img {
+    width: 20vw;
+    margin: 0 auto;
+}
+
+.content {
+    background-color: #efefef;
+    text-align: center;
+    margin: 0 auto;
+    width: 40vw;
+    min-height: 60vh;
+    padding: 2rem;
+}
+
+.content ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
