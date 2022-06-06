@@ -52,8 +52,6 @@ Het project bestaat volledig uit deze technologieën en gebruikt volgende python
 ### Prerequisites
 
 * pip
-    * Download <a href="https://bootstrap.pypa.io/get-pip.py">pip.py</a>
-    * Change current directory to
   1. Change directory to Downloads
   ```sh
   cd Downloads
